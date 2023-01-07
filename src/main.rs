@@ -30,11 +30,20 @@ fn main() {
 
 fn new_project(path: Option<&str>) {
     let root;
+    let project_name: String;
     if path.is_some() {
         root = path.unwrap();
         std::fs::create_dir_all(root).expect("Failed to create new directory");
+        project_name = root.to_owned();
     } else {
         root = "./";
+        project_name = std::env::current_dir()
+            .unwrap()
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_owned();
     }
 
     let sdk_path = match std::env::var(SDK_ENV_VAR) {
@@ -45,17 +54,14 @@ fn new_project(path: Option<&str>) {
         }
     };
 
-    let template = std::fs::read_to_string("template/CMakeLists.txt")
-        .expect("Could not read CMakeLists template file");
-
     let re = Regex::new("PROJECT_NAME").unwrap();
-    let template = re.replace_all(&template, root);
+    let template = re.replace_all(CMAKE_TEMPLATE, &project_name);
 
     let re = Regex::new("SDK_PATH").unwrap();
     let template = re.replace_all(&template, sdk_path);
 
-    let _project_main =
-        File::create(format!("{}/{}.c", root, root)).expect("Could not create new file");
+    let mut project_main =
+        File::create(format!("{}/{}.c", root, project_name)).expect("Could not create new file");
 
     let mut cmake_list =
         File::create(format!("{}/CMakeLists.txt", root)).expect("Could not create CMakeLists.txt");
@@ -63,4 +69,30 @@ fn new_project(path: Option<&str>) {
     cmake_list
         .write_all(template.as_bytes())
         .expect("Failed to write CMakeLists.txt");
+
+    project_main
+        .write_all(MAIN_TEMPLATE.as_bytes())
+        .expect("Failed to write project main file");
 }
+
+const CMAKE_TEMPLATE: &'static str = r#"cmake_minimum_required(VERSION 3.13)
+
+include(SDK_PATH/pico_sdk_init.cmake)
+
+project(PROJECT_NAME)
+
+pico_sdk_init()
+
+add_executable(PROJECT_NAME
+    PROJECT_NAME.c
+)
+
+target_link_libraries(PROJECT_NAME pico_stdlib)
+
+pico_add_extra_outputs(PROJECT_NAME)"#;
+
+const MAIN_TEMPLATE: &'static str = r#"include "pico/stdlib.h"
+
+int main() {
+    
+}"#;

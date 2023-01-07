@@ -10,3 +10,5 @@ clap = { version = "4.0.32", features = ["derive"] }
 clap_derive = "4.0.21"
 regex = "1.7.0"
 
+[[bin]]
+name = "pico-gen"

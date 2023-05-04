@@ -55,10 +55,11 @@ fn new_project(path: Option<&str>) {
     };
 
     let re = Regex::new("PROJECT_NAME").unwrap();
-    let template = re.replace_all(CMAKE_TEMPLATE, &project_name);
+    let cmake_template = re.replace_all(CMAKE_TEMPLATE, &project_name);
+    let justfile_template = re.replace_all(JUSTFILE_TEMPLATE, &project_name);
 
     let re = Regex::new("SDK_PATH").unwrap();
-    let template = re.replace_all(&template, sdk_path);
+    let cmake_template = re.replace_all(&cmake_template, sdk_path);
 
     let mut project_main =
         File::create(format!("{}/{}.c", root, project_name)).expect("Could not create new file");
@@ -66,13 +67,20 @@ fn new_project(path: Option<&str>) {
     let mut cmake_list =
         File::create(format!("{}/CMakeLists.txt", root)).expect("Could not create CMakeLists.txt");
 
+    let mut justfile =
+        File::create(format!("{}/justfile", root)).expect("Could not create justfile");
+
     cmake_list
-        .write_all(template.as_bytes())
+        .write_all(cmake_template.as_bytes())
         .expect("Failed to write CMakeLists.txt");
 
     project_main
         .write_all(MAIN_TEMPLATE.as_bytes())
         .expect("Failed to write project main file");
+
+    justfile
+        .write_all(justfile_template.as_bytes())
+        .expect("Failed to write justfile");
 }
 
 const CMAKE_TEMPLATE: &'static str = r#"cmake_minimum_required(VERSION 3.13)
@@ -96,3 +104,15 @@ const MAIN_TEMPLATE: &'static str = r#"#include "pico/stdlib.h"
 int main() {
     
 }"#;
+
+const JUSTFILE_TEMPLATE: &'static str = r#"default:
+    @just build
+    @just load
+
+build:
+    @cmake .
+    @make
+
+load:
+    @picotool load PROJECT_NAME.elf
+    @picotool reboot"#;

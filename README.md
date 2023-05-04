@@ -17,7 +17,7 @@ A simple (albeit slightly hacky) project generator for the Raspberry Pi Pico usi
 
 Clone this repo and run `cargo install --path .` in the repo root. Currently there are no pre-built binaries and currently no plans to offer such. If you wish to package for your distro of choice, you have my blessing to do so.
 
-### Executing program
+### Usage
 
 `pico-gen new` will create a new directory and generate a project inside it.
 `pico-gen init` will generate a project inside the current directory
@@ -36,6 +36,8 @@ $ cd blink
 $ cmake .
 $ make
 ```
+
+The included `justfile` has two named commands, `build`, and `load`. Build does what you probably expect. Load will attempt to upload the built project to a connected Pico in BOOTSEL mode and then reboot the device. Running `just` without a command will run `build` and `load` in that order by default.
 
 ## Help
 

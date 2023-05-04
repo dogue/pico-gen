@@ -15,7 +15,7 @@ A simple (albeit slightly hacky) project generator for the Raspberry Pi Pico usi
 
 ### Installing
 
-Clone this repo and run `cargo install --path .` in the repo root. Currently there are no pre-built binaries and currently no plans to offer such. If you wish to package for your distro of choice, you have my blessing to do so.
+Clone this repo and run `cargo install --path .` in the repo root. Currently there are no pre-built binaries and currently no plans to offer such. If you wish to package for your distro of choice, I'd be delighted to hear about it.
 
 ### Usage
 
